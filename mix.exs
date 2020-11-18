@@ -26,7 +26,9 @@ defmodule Hubbabuddy.MixProject do
         :logger,
         :phoenix_ecto,
         :postgrex,
-        :ueberauth_github
+        :ueberauth_github,
+        :ueberauth_slack,
+        :httpoison
       ],
       mod: {Hubbabuddy.Application, []},
       extra_applications: [:logger, :runtime_tools]
@@ -54,8 +56,12 @@ defmodule Hubbabuddy.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:oauth2, "~> 2.0", override: true},
       {:ueberauth, "~> 0.6"},
-      {:ueberauth_github, "~> 0.8"}
+      {:ueberauth_github, "~> 0.8"},
+      {:ueberauth_slack, "~> 0.6"},
+      {:tentacat, "~> 2.0"},
+      {:httpoison, "~> 1.7"}
     ]
   end
 

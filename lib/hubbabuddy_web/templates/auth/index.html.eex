@@ -1,0 +1,4 @@
+<ul>
+  <li><%= authorize_link(@conn, @user, "github") %></li>
+  <li><%= authorize_link(@conn, @user, "slack") %></li>
+</ul>

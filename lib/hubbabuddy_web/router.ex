@@ -18,16 +18,19 @@ defmodule HubbabuddyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/send_slack", PageController, :send_slack
   end
 
   scope "/auth", HubbabuddyWeb do
     pipe_through :browser
 
+    get "/", AuthController, :index
+    get "/logout", AuthController, :delete
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
   end
 
-  # resources "/users", Hubbabuddy.UserController
+  resources "/users", Hubbabuddy.UserController
 
   # Other scopes may use custom stacks.
   # scope "/api", HubbabuddyWeb do

@@ -5,18 +5,15 @@
 
 <section class="row">
   <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.5/CHANGELOG.md">v1.5 Changelog</a>
-      </li>
-    </ul>
+    <h2>STUFF</h2>
+    <%=
+    if @current_user == nil || @current_user.github_token == nil || @current_user.slack_token == nil do
+      link("Authorize", to: RouterHelpers.auth_path(@conn, :index))
+    else
+      (pull_requests(@current_user) |> Enum.map(fn %{"number" => number, "title" => title, "html_url" => html_url} -> link("##{number} #{title}", to: html_url) end))
+      ++ [link("Send to Slack", to: RouterHelpers.page_path(@conn, :send_slack))]
+    end
+    %>
   </article>
   <article class="column">
     <h2>Help</h2>

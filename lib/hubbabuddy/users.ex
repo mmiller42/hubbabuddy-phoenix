@@ -50,7 +50,7 @@ defmodule Hubbabuddy.Users do
 
   """
   def get_user_by_email(email) do
-    Repo.one(from u in User, where: u.email == ^email, select: u)
+    Repo.one(from u in User, where: u.email == ^email)
   end
 
   @doc """
@@ -84,39 +84,51 @@ defmodule Hubbabuddy.Users do
 
   """
   def update_user(%User{} = user, attrs) do
+    IO.puts("UPDATE USER")
+    IO.inspect(user)
+    IO.inspect(attrs)
+
     user
     |> User.changeset(attrs)
     |> Repo.update()
+    |> IO.inspect()
   end
 
-  @doc """
-  Creates the user if it does not exist or updates it if the email address is
-  already associated with a user.
+  def create_or_update_user(%{} = attrs) do
+    create_user(attrs) |> update_on_conflict(attrs)
+  end
 
-  ## Examples
+  defp update_on_conflict({:ok, user}, attrs) do
+    IO.puts("update_on_conflict ALL")
+    IO.inspect(user)
+    IO.inspect(attrs)
+    {:ok, user}
+  end
 
-      iex> create_or_update_user(%{"email" => "matt.miller@smartrent.com", "github_token" => "123"})
-      {:ok, %User{}} # Updated existing user
+  defp update_on_conflict(
+         {:error,
+          %Ecto.Changeset{
+            errors: [email: {_message, [constraint: :unique, constraint_name: _constraint_name]}]
+          }},
+         %{"email" => email} = attrs
+       ) do
+    IO.puts("update_on_conflict ERROR CONFLICT")
+    update_user(get_user_by_email(email), attrs)
+  end
 
-      iex> create_or_update_user(%{"email" => "new@user.com", "github_token" => "456"})
-      {:ok, %User{}} # Created new user
+  defp update_on_conflict({:error, reason}, attrs) do
+    IO.puts("update_on_conflict GENERAL ERROR")
+    IO.inspect(reason)
+    IO.inspect(attrs)
+    {:error, reason}
+  end
 
-      iex> create_or_update_user(%{"email" => "", "github_token" => "456"})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_or_update_user(%{optional(:__struct__) => none, optional(atom | binary) => any}) ::
-          any
-  def create_or_update_user(%{"email" => email} = attrs) do
-    case create_user(attrs) do
-      {:ok, user} ->
-        {:ok, user}
-
-      {:error,
-       %Ecto.Changeset{
-         errors: [email: {_message, [constraint: :unique, constraint_name: _constraint_name]}]
-       }} ->
-        update_user(get_user_by_email(email), attrs)
+  @spec clear_tokens(Hubbabuddy.Users.User.t()) :: any
+  def clear_tokens(%User{} = user) do
+    try do
+      update_user(user, %{"github_token" => nil, "slack_token" => nil})
+    rescue
+      _ -> nil
     end
   end
 
